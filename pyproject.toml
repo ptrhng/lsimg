@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "lsimg"
+version = "0.0.1"
+description = "lsimg is \"ls\" command for images, displaying images in a directory."
+authors = ["ptrhng <peter@ptrhng.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pillow = "^10.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+
+[tool.poetry.scripts]
+lsimg = "lsimg.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

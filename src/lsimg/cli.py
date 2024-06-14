@@ -1,4 +1,3 @@
-#!/usr/bin/env .venv/bin/python
 import base64
 import sys
 from pathlib import Path
@@ -80,7 +79,3 @@ def main():
         pct = 100 / num_cols * len(batch)
         msg = encode(f.read(), f'{pct}%', 'auto')
         print(msg)
-
-
-if __name__ == '__main__':
-    main()
