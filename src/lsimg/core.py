@@ -1,7 +1,4 @@
-from typing import Iterable
-
 import base64
-import sys
 from pathlib import Path
 import itertools
 import io
@@ -23,7 +20,7 @@ def encode(d: bytes, w: str, h: str) -> str:
 
 def is_image_file(fname: str) -> bool:
     file_type, _ = mimetypes.guess_type(fname)
-    return file_type and file_type.startswith('image/')
+    return file_type is not None and file_type.startswith('image/')
 
 
 def run(path: Path):
@@ -45,7 +42,7 @@ def run(path: Path):
     else:
         fpaths.append(path)
 
-    fpaths = [v for v in fpaths if is_image_file(v)]
+    fpaths = [v for v in fpaths if is_image_file(v.name)]
     background_color = ImageColor.getrgb('black')
     font = ImageFont.load_default(size=label_height - label_spacing * 2)
 
