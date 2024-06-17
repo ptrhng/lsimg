@@ -19,10 +19,15 @@ ruff = "^0.4.9"
 lsimg = "lsimg.cli:main"
 
 [tool.mypy]
-files = "src"
+files = "src,tests"
 
 [too.ruff]
 src = ["src"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
 
 [build-system]
 requires = ["poetry-core"]
