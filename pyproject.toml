@@ -13,12 +13,16 @@ click = "^8.1.7"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
 mypy = "^1.10.0"
+ruff = "^0.4.9"
 
 [tool.poetry.scripts]
 lsimg = "lsimg.cli:main"
 
 [tool.mypy]
 files = "src"
+
+[too.ruff]
+src = ["src"]
 
 [build-system]
 requires = ["poetry-core"]

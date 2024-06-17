@@ -60,7 +60,7 @@ def run(path: Path):
                     draw.text(((image_width - x) // 2, image_height + label_spacing,), fname, font=font)
                     img.thumbnail((image_width, image_height,))
                     background.paste(img, box=(0, 0))
-            except UnidentifiedImageError as e:
+            except UnidentifiedImageError:
                 # TODO: log this error
                 continue
 
