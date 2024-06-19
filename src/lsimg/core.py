@@ -3,6 +3,7 @@ from pathlib import Path
 import itertools
 import io
 import mimetypes
+from typing import Iterable
 
 from PIL import Image
 from PIL import ImageDraw
@@ -23,7 +24,15 @@ def is_image_file(fname: str) -> bool:
     return file_type is not None and file_type.startswith('image/')
 
 
-def run(path: Path):
+def find_image_files(root: Path) -> Iterable[Path]:
+    paths = [root]
+    if root.is_dir():
+        paths = list(root.iterdir())
+
+    return [p for p in paths if is_image_file(p.name)]
+
+
+def run(files: Iterable[Path]):
     # TODO: os.get_terminal_size to find the size of terminal
     # and compute the number of columns
     num_cols = 8
@@ -34,35 +43,26 @@ def run(path: Path):
     label_height = 20
     label_spacing = 1
 
-    fpaths = []
-    if path.is_dir():
-        for fpath in path.iterdir():
-            if fpath.is_file():
-                fpaths.append(fpath)
-    else:
-        fpaths.append(path)
-
-    fpaths = [v for v in fpaths if is_image_file(v.name)]
     background_color = ImageColor.getrgb('black')
     font = ImageFont.load_default(size=label_height - label_spacing * 2)
 
-    for batch in itertools.batched(fpaths, num_cols):
+    for batch in itertools.batched(files, num_cols):
         frame = Image.new('RGB', size=((image_width + image_spacing) * len(batch), image_height + label_height,), color=background_color)
 
-        for i, fpath in enumerate(batch):
-            fname = fpath.name
+        for i, file in enumerate(batch):
+            fname = file.name
+            background = Image.new('RGB', size=(image_width, image_height + label_height), color=background_color)
+            draw = ImageDraw.Draw(background)
+            _, _, x, _ = draw.textbbox((0, 0,), fname, font=font)
+            draw.text(((image_width - x) // 2, image_height + label_spacing,), fname, font=font)
 
             try:
-                with Image.open(fpath) as img:
-                    background = Image.new('RGB', size=(image_width, image_height + label_height), color=background_color)
-                    draw = ImageDraw.Draw(background)
-                    _, _, x, _ = draw.textbbox((0, 0,), fname, font=font)
-                    draw.text(((image_width - x) // 2, image_height + label_spacing,), fname, font=font)
+                with Image.open(file) as img:
                     img.thumbnail((image_width, image_height,))
                     background.paste(img, box=(0, 0))
             except UnidentifiedImageError:
                 # TODO: log this error
-                continue
+                pass
 
             frame.paste(background, box=((image_width + image_spacing) * i, 0,))
 
@@ -72,5 +72,4 @@ def run(path: Path):
 
         pct = 100 / num_cols * len(batch)
         msg = encode(f.read(), f'{pct}%', 'auto')
-        print(msg)
-
+        return msg
