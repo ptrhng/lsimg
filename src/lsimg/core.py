@@ -41,10 +41,10 @@ def run(files: Iterable[Path]):
     image_height = 200
     image_spacing = 10
     label_height = 20
-    label_spacing = 1
+    font_size = 16
 
     background_color = ImageColor.getrgb("black")
-    font = ImageFont.load_default(size=label_height - label_spacing * 2)
+    font = ImageFont.load_default(size=font_size)
 
     for batch in itertools.batched(files, num_cols):
         frame = Image.new(
@@ -64,7 +64,7 @@ def run(files: Iterable[Path]):
                 color=background_color,
             )
             draw = ImageDraw.Draw(background)
-            _, _, x, _ = draw.textbbox(
+            _, _, x, y = draw.textbbox(
                 (
                     0,
                     0,
@@ -75,7 +75,7 @@ def run(files: Iterable[Path]):
             draw.text(
                 (
                     (image_width - x) // 2,
-                    image_height + label_spacing,
+                    image_height + (label_height - y),
                 ),
                 fname,
                 font=font,
