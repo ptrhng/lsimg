@@ -21,7 +21,7 @@ lsimg = "lsimg.cli:main"
 [tool.mypy]
 files = "src,tests"
 
-[too.ruff]
+[tool.ruff]
 src = ["src"]
 
 [tool.pytest.ini_options]
