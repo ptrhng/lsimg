@@ -1,14 +1,14 @@
 import base64
-from pathlib import Path
-import itertools
 import io
+import itertools
 import mimetypes
+from pathlib import Path
 from typing import Iterable
 
 from PIL import Image
+from PIL import ImageColor
 from PIL import ImageDraw
 from PIL import ImageFont
-from PIL import ImageColor
 from PIL import UnidentifiedImageError
 
 
