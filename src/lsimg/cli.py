@@ -19,5 +19,6 @@ def main(args: Tuple[str]):
     for arg in args:
         click.secho(f"{arg}:", fg="white")
         fpaths = sorted(core.find_image_files(Path(arg)))
-        out = core.run(fpaths)
-        click.echo(out)
+        for out in core.run(fpaths):
+            click.echo(out)
+            click.echo()

@@ -32,7 +32,7 @@ def find_image_files(root: Path) -> Iterable[Path]:
     return [p for p in paths if is_image_file(p.name)]
 
 
-def run(files: Iterable[Path]):
+def run(files: Iterable[Path]) -> Iterable[str]:
     # TODO: os.get_terminal_size to find the size of terminal
     # and compute the number of columns
     num_cols = 8
@@ -107,5 +107,4 @@ def run(files: Iterable[Path]):
         f.seek(0)
 
         pct = 100 / num_cols * len(batch)
-        msg = encode(f.read(), f"{pct}%", "auto")
-        return msg
+        yield encode(f.read(), f"{pct}%", "auto")
