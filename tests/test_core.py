@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -37,3 +38,10 @@ def test_find_iamge_files_single_file(testdata: Path):
 
 def test_find_image_files_ignore_nonexistent(testdata: Path):
     assert core.find_image_files(testdata / "nonexistent") == []
+
+
+def test_get_terminal_size():
+    _, fd = os.openpty()
+    width, height = core.get_terminal_size(fd)
+    assert width == 0
+    assert height == 0

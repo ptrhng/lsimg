@@ -1,9 +1,14 @@
+import array
 import base64
+import fcntl
 import io
 import itertools
 import mimetypes
+import sys
+import termios
 from pathlib import Path
 from typing import Iterable
+from typing import Tuple
 
 from PIL import Image
 from PIL import ImageColor
@@ -32,17 +37,22 @@ def find_image_files(root: Path) -> Iterable[Path]:
     return [p for p in paths if is_image_file(p.name)]
 
 
-def run(files: Iterable[Path]) -> Iterable[str]:
-    # TODO: os.get_terminal_size to find the size of terminal
-    # and compute the number of columns
-    num_cols = 8
+def get_terminal_size(fd: int) -> Tuple[int, int]:
+    """Return the size of the terminal window as (width, height) in pixels."""
+    buf = array.array("H", [0, 0, 0, 0])
+    fcntl.ioctl(fd, termios.TIOCGWINSZ, buf)
+    return buf[2], buf[3]
 
+
+def run(files: Iterable[Path]) -> Iterable[str]:
     image_width = 200
     image_height = 200
     image_spacing = 10
     label_height = 20
     font_size = 16
 
+    terminal_width, _ = get_terminal_size(sys.stdout.fileno())
+    num_cols = terminal_width // (image_width + image_spacing)
     background_color = ImageColor.getrgb("black")
     font = ImageFont.load_default(size=font_size)
 
