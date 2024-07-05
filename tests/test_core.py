@@ -56,3 +56,21 @@ class TestImageRow:
 
         assert img.width == 400
         assert img.height == 220
+
+
+def test_find_best_fit_exact():
+    num_cols, box_width, box_height = core.find_best_fit(
+        box_width=200, box_height=200, terminal_width=1000
+    )
+    assert num_cols == 5
+    assert box_width == 200
+    assert box_height == 200
+
+
+def test_find_best_fit_scale():
+    num_cols, box_width, box_height = core.find_best_fit(
+        box_width=200, box_height=200, terminal_width=900
+    )
+    assert num_cols == 4
+    assert box_width == 225
+    assert box_height == 225
