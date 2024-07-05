@@ -45,3 +45,14 @@ def test_get_terminal_size():
     width, height = core.get_terminal_size(fd)
     assert width == 0
     assert height == 0
+
+
+class TestImageRow:
+    def test_image_size(self, testdata: Path):
+        row = core.ImageRow(box_width=200, box_height=220, padding=5, bg_color="black")
+        row.add(testdata / "coffee.jpg")
+        row.add(testdata / "sea.png")
+        img = row.to_image()
+
+        assert img.width == 400
+        assert img.height == 220

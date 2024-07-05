@@ -8,6 +8,7 @@ import sys
 import termios
 from pathlib import Path
 from typing import Iterable
+from typing import List
 from typing import Tuple
 
 from PIL import Image
@@ -45,76 +46,67 @@ def get_terminal_size(fd: int) -> Tuple[int, int]:
 
 
 def run(files: Iterable[Path]) -> Iterable[str]:
-    image_width = 200
-    image_height = 200
-    image_spacing = 10
-    label_height = 20
-    font_size = 16
-
+    box_width = 200
+    box_height = 220
+    padding = 5
     terminal_width, _ = get_terminal_size(sys.stdout.fileno())
-    num_cols = terminal_width // (image_width + image_spacing)
-    background_color = ImageColor.getrgb("black")
-    font = ImageFont.load_default(size=font_size)
+    num_cols = terminal_width // box_width
 
-    for batch in itertools.batched(files, num_cols):
-        frame = Image.new(
-            "RGB",
-            size=(
-                (image_width + image_spacing) * len(batch),
-                image_height + label_height,
-            ),
-            color=background_color,
-        )
+    for chunk in itertools.batched(files, num_cols):
+        row = ImageRow(box_width, box_height, padding, bg_color="black")
+        for file in chunk:
+            row.add(file)
 
-        for i, file in enumerate(batch):
-            fname = file.name
-            background = Image.new(
-                "RGB",
-                size=(image_width, image_height + label_height),
-                color=background_color,
-            )
-            draw = ImageDraw.Draw(background)
-            _, _, x, y = draw.textbbox(
-                (
-                    0,
-                    0,
-                ),
-                fname,
-                font=font,
-            )
-            draw.text(
-                (
-                    (image_width - x) // 2,
-                    image_height + (label_height - y),
-                ),
-                fname,
-                font=font,
-            )
+        pct = 100 / num_cols * len(chunk)
+        yield encode(row.to_bytes(), f"{pct}%", "auto")
 
+
+class ImageRow:
+    """ImageRow represents a row containing image thumbnails."""
+
+    def __init__(self, box_width: int, box_height: int, padding: int, bg_color: str):
+        self.box_width = box_width
+        self.box_height = box_height
+        self.padding = padding
+        self.image_width = box_width - padding * 2
+        self.image_height = self.image_width
+        self.label_height = box_height - self.image_height
+        self.bg_color = ImageColor.getrgb(bg_color)
+        self.font = ImageFont.load_default(size=16)
+        self.files: List[Path] = []
+
+    def add(self, file: Path):
+        """add image file to a row"""
+        self.files.append(file)
+
+    def to_image(self) -> Image.Image:
+        row_width = self.box_width * len(self.files)
+        row_height = self.box_height
+        row = Image.new("RGB", size=(row_width, row_height), color=self.bg_color)
+
+        for i, file in enumerate(self.files):
             try:
                 with Image.open(file) as img:
-                    img.thumbnail(
-                        (
-                            image_width,
-                            image_height,
-                        )
-                    )
-                    background.paste(img, box=(0, 0))
+                    img.thumbnail(size=(self.image_width, self.image_height))
+                    img_x = self.padding + self.box_width * i
+                    img_y = 0
+                    row.paste(img, box=(img_x, img_y))
             except UnidentifiedImageError:
                 # TODO: log this error
                 pass
 
-            frame.paste(
-                background,
-                box=(
-                    (image_width + image_spacing) * i,
-                    0,
-                ),
-            )
+            draw = ImageDraw.Draw(row)
+            text_x = self.box_width * i + self.image_width / 2
+            text_y = self.box_height - self.label_height + self.label_height / 2
+            draw.text(xy=(text_x, text_y), text=file.name, font=self.font, anchor="mm")
 
+        return row
+
+    def to_bytes(self, format: str = "png") -> bytes:
+        """return row image as bytes"""
+        img = self.to_image()
         f = io.BytesIO()
-        frame.save(f, format="png")
+        img.save(f, format=format)
         f.seek(0)
 
-        pct = 100 / num_cols * len(batch)
-        yield encode(f.read(), f"{pct}%", "auto")
+        return f.read()
