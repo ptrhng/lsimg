@@ -104,8 +104,8 @@ class ImageRow:
             try:
                 with Image.open(file) as img:
                     img.thumbnail(size=(self.image_width, self.image_height))
-                    img_x = self.padding + self.box_width * i
-                    img_y = 0
+                    img_x = (self.box_width - img.width) // 2 + self.box_width * i
+                    img_y = (self.box_width - img.height) // 2
                     row.paste(img, box=(img_x, img_y))
             except UnidentifiedImageError:
                 # TODO: log this error
