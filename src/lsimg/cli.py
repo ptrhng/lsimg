@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from typing import Tuple
 
@@ -19,6 +20,4 @@ def main(args: Tuple[str]):
     for arg in args:
         click.secho(f"{arg}:", fg="white")
         fpaths = sorted(core.find_image_files(Path(arg)))
-        for out in core.run(fpaths):
-            click.echo(out)
-            click.echo()
+        core.run(fpaths, sys.stdout)

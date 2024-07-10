@@ -1,14 +1,14 @@
 import array
-import base64
 import fcntl
 import io
 import itertools
 import mimetypes
-import sys
+import os
 import termios
 from pathlib import Path
 from typing import Iterable
 from typing import List
+from typing import TextIO
 from typing import Tuple
 
 from PIL import Image
@@ -17,12 +17,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from PIL import UnidentifiedImageError
 
-
-def encode(d: bytes) -> str:
-    encoded = base64.standard_b64encode(d).decode()
-    msg = f"\033]1337;File=preserveAspectRatio=1;inline=1:{encoded}\a"
-
-    return msg
+from lsimg.encoder import ITerm2Encoder
 
 
 def is_image_file(fname: str) -> bool:
@@ -60,21 +55,28 @@ def find_best_fit(
     return num_cols, box_width, box_height
 
 
-def run(files: Iterable[Path]) -> Iterable[str]:
+def run(files: Iterable[Path], fp: TextIO):
+    def write(s: str):
+        fp.write(s)
+        fp.flush()
+
     box_width = 200
     box_height = 220
     padding = 5
-    terminal_width, _ = get_terminal_size(sys.stdout.fileno())
+    terminal_width, _ = get_terminal_size(fp.fileno())
     num_cols, box_width, box_height = find_best_fit(
         box_width, box_height, terminal_width
     )
+    encoder = ITerm2Encoder()
 
     for chunk in itertools.batched(files, num_cols):
         row = ImageRow(box_width, box_height, padding, bg_color="black")
         for file in chunk:
             row.add(file)
 
-        yield encode(row.to_bytes())
+        for data in encoder.encode(row.to_bytes()):
+            write(data)
+        write(os.linesep)
 
 
 class ImageRow:
