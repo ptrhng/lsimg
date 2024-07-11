@@ -17,7 +17,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from PIL import UnidentifiedImageError
 
-from lsimg.encoder import ITerm2Encoder
+from lsimg import encoder
 
 
 def is_image_file(fname: str) -> bool:
@@ -67,14 +67,16 @@ def run(files: Iterable[Path], fp: TextIO):
     num_cols, box_width, box_height = find_best_fit(
         box_width, box_height, terminal_width
     )
-    encoder = ITerm2Encoder()
+    enc = encoder.get_graphics_encoder(os.environ.copy())
+    if enc is None:
+        raise Exception("No suitable terminal graphics protocol found")
 
     for chunk in itertools.batched(files, num_cols):
         row = ImageRow(box_width, box_height, padding, bg_color="black")
         for file in chunk:
             row.add(file)
 
-        for data in encoder.encode(row.to_bytes()):
+        for data in enc.encode(row.to_bytes()):
             write(data)
         write(os.linesep)
 
