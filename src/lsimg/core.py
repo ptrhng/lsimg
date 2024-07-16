@@ -55,7 +55,7 @@ def find_best_fit(
     return num_cols, box_width, box_height
 
 
-def run(files: Iterable[Path], fp: TextIO):
+def run(args: Iterable[str], fp: TextIO):
     def write(s: str):
         fp.write(s)
         fp.flush()
@@ -71,14 +71,17 @@ def run(files: Iterable[Path], fp: TextIO):
     if enc is None:
         raise Exception("No suitable terminal graphics protocol found")
 
-    for chunk in itertools.batched(files, num_cols):
-        row = ImageRow(box_width, box_height, padding, bg_color="black")
-        for file in chunk:
-            row.add(file)
+    for arg in args:
+        write(f"{arg}:{os.linesep}")
+        files = sorted(find_image_files(Path(arg)))
+        for chunk in itertools.batched(files, num_cols):
+            row = ImageRow(box_width, box_height, padding, bg_color="black")
+            for file in chunk:
+                row.add(file)
 
-        for data in enc.encode(row.to_bytes()):
-            write(data)
-        write(os.linesep)
+            for data in enc.encode(row.to_bytes()):
+                write(data)
+            write(os.linesep)
 
 
 class ImageRow:
