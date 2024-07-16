@@ -55,21 +55,26 @@ def find_best_fit(
     return num_cols, box_width, box_height
 
 
-def run(args: Iterable[str], fp: TextIO):
+def run(args: Iterable[str], out: TextIO, errout: TextIO) -> int:
     def write(s: str):
-        fp.write(s)
-        fp.flush()
+        out.write(s)
+        out.flush()
+
+    def write_error_line(s: str):
+        errout.write(f"ERROR: {s}")
+        errout.write(os.linesep)
 
     box_width = 200
     box_height = 220
     padding = 5
-    terminal_width, _ = get_terminal_size(fp.fileno())
+    terminal_width, _ = get_terminal_size(out.fileno())
     num_cols, box_width, box_height = find_best_fit(
         box_width, box_height, terminal_width
     )
     enc = encoder.get_graphics_encoder(os.environ.copy())
     if enc is None:
-        raise Exception("No suitable terminal graphics protocol found")
+        write_error_line("no suitable terminal graphics protocol found")
+        return 1
 
     for arg in args:
         write(f"{arg}:{os.linesep}")
@@ -82,6 +87,8 @@ def run(args: Iterable[str], fp: TextIO):
             for data in enc.encode(row.to_bytes()):
                 write(data)
             write(os.linesep)
+
+    return 0
 
 
 class ImageRow:
