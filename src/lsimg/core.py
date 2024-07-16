@@ -1,15 +1,11 @@
 import array
 import fcntl
 import io
-import itertools
 import mimetypes
-import os
 import termios
 from pathlib import Path
-from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import TextIO
 from typing import Tuple
 
 from PIL import Image
@@ -17,8 +13,6 @@ from PIL import ImageColor
 from PIL import ImageDraw
 from PIL import ImageFont
 from PIL import UnidentifiedImageError
-
-from lsimg import encoder
 
 
 def is_image_file(fname: str) -> bool:
@@ -58,49 +52,6 @@ def find_best_fit(
     box_width += adj
     box_height += adj
     return num_cols, box_width, box_height
-
-
-def run(args: Iterable[str], out: TextIO, errout: TextIO, env: Dict[str, str]) -> int:
-    def write(s: str):
-        out.write(s)
-        out.flush()
-
-    def write_error_line(s: str):
-        errout.write(f"ERROR: {s}")
-        errout.write(os.linesep)
-
-    box_width = 200
-    box_height = 220
-    padding = 5
-
-    enc = encoder.get_graphics_encoder(env)
-    if enc is None:
-        write_error_line("no suitable terminal graphics protocol found")
-        return 1
-
-    try:
-        terminal_width, _ = get_terminal_size(out.fileno())
-    except OSError as e:
-        write_error_line(f"unable to obtain terminal window size: {e}")
-        return 1
-
-    num_cols, box_width, box_height = find_best_fit(
-        box_width, box_height, terminal_width
-    )
-
-    for arg in args:
-        write(f"{arg}:{os.linesep}")
-        files = sorted(find_image_files(Path(arg)))
-        for chunk in itertools.batched(files, num_cols):
-            row = ImageRow(box_width, box_height, padding, bg_color="black")
-            for file in chunk:
-                row.add(file)
-
-            for data in enc.encode(row.to_bytes()):
-                write(data)
-            write(os.linesep)
-
-    return 0
 
 
 class ImageRow:

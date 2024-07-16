@@ -4,8 +4,9 @@ from typing import Tuple
 
 import click
 
-from lsimg import core
 from lsimg import version
+from lsimg.app import App
+from lsimg.app import Config
 
 
 @click.command()
@@ -16,5 +17,6 @@ def main(args: Tuple[str]):
     if not args:
         args = (os.getcwd(),)
 
-    rc = core.run(args, sys.stdout, sys.stderr, os.environ.copy())
+    app = App(Config(out=sys.stdout, errout=sys.stderr, env=os.environ.copy()))
+    rc = app.run(args)
     sys.exit(rc)
