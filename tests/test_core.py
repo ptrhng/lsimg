@@ -1,4 +1,6 @@
 import os
+import sys
+from io import StringIO
 from pathlib import Path
 
 import pytest
@@ -74,3 +76,31 @@ def test_find_best_fit_scale():
     assert num_cols == 4
     assert box_width == 225
     assert box_height == 225
+
+
+def test_run_get_terminal_size_error():
+    errout = StringIO()
+    rc = core.run(
+        args=[], out=sys.stdin, errout=errout, env={"TERM_PROGRAM": "iTerm.app"}
+    )
+
+    errout.seek(0)
+
+    assert rc == 1
+    assert errout.read().startswith("ERROR: unable to obtain terminal window size")
+
+
+def test_run_no_graphical_protocol_error():
+    errout = StringIO()
+    _, fd = os.openpty()
+    with open(fd, "r") as out:
+        rc = core.run(
+            args=[], out=out, errout=errout, env={"TERM": "", "TERM_PROGRAM": ""}
+        )
+
+    errout.seek(0)
+
+    assert rc == 1
+    assert errout.read().startswith(
+        "ERROR: no suitable terminal graphics protocol found"
+    )

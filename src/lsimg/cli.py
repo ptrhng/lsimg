@@ -16,5 +16,5 @@ def main(args: Tuple[str]):
     if not args:
         args = (os.getcwd(),)
 
-    rc = core.run(args, sys.stdout, sys.stderr)
+    rc = core.run(args, sys.stdout, sys.stderr, os.environ.copy())
     sys.exit(rc)

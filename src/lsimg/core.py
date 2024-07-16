@@ -6,6 +6,7 @@ import mimetypes
 import os
 import termios
 from pathlib import Path
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import TextIO
@@ -34,7 +35,11 @@ def find_image_files(root: Path) -> Iterable[Path]:
 
 
 def get_terminal_size(fd: int) -> Tuple[int, int]:
-    """Return the size of the terminal window as (width, height) in pixels."""
+    """Return the size of the terminal window as (width, height) in pixels.
+
+    Raises:
+        OSError: if ioctl() call fails
+    """
     buf = array.array("H", [0, 0, 0, 0])
     fcntl.ioctl(fd, termios.TIOCGWINSZ, buf)
     return buf[2], buf[3]
@@ -55,7 +60,7 @@ def find_best_fit(
     return num_cols, box_width, box_height
 
 
-def run(args: Iterable[str], out: TextIO, errout: TextIO) -> int:
+def run(args: Iterable[str], out: TextIO, errout: TextIO, env: Dict[str, str]) -> int:
     def write(s: str):
         out.write(s)
         out.flush()
@@ -67,14 +72,21 @@ def run(args: Iterable[str], out: TextIO, errout: TextIO) -> int:
     box_width = 200
     box_height = 220
     padding = 5
-    terminal_width, _ = get_terminal_size(out.fileno())
-    num_cols, box_width, box_height = find_best_fit(
-        box_width, box_height, terminal_width
-    )
-    enc = encoder.get_graphics_encoder(os.environ.copy())
+
+    enc = encoder.get_graphics_encoder(env)
     if enc is None:
         write_error_line("no suitable terminal graphics protocol found")
         return 1
+
+    try:
+        terminal_width, _ = get_terminal_size(out.fileno())
+    except OSError as e:
+        write_error_line(f"unable to obtain terminal window size: {e}")
+        return 1
+
+    num_cols, box_width, box_height = find_best_fit(
+        box_width, box_height, terminal_width
+    )
 
     for arg in args:
         write(f"{arg}:{os.linesep}")
