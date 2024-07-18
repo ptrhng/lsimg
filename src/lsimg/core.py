@@ -16,11 +16,13 @@ from PIL import UnidentifiedImageError
 
 
 def is_image_file(fname: str) -> bool:
+    """Return True if an image file."""
     file_type, _ = mimetypes.guess_type(fname)
     return file_type is not None and file_type.startswith("image/")
 
 
 def find_image_files(root: Path) -> Iterable[Path]:
+    """Return all immediate image files found in the path."""
     paths = [root]
     if root.is_dir():
         paths = list(root.iterdir())
@@ -69,10 +71,15 @@ class ImageRow:
         self.files: List[Path] = []
 
     def add(self, file: Path):
-        """add image file to a row"""
+        """Add image file to a row."""
         self.files.append(file)
 
     def to_image(self) -> Image.Image:
+        """Combine all image files into a single image.
+
+        For an image file that cannot be opend and identified, only label text (along with blank
+        box) is displayed.
+        """
         row_width = self.box_width * len(self.files)
         row_height = self.box_height
         row = Image.new("RGB", size=(row_width, row_height), color=self.bg_color)
@@ -96,7 +103,7 @@ class ImageRow:
         return row
 
     def to_bytes(self, format: str = "png") -> bytes:
-        """return row image as bytes"""
+        """Return row image as bytes."""
         img = self.to_image()
         f = io.BytesIO()
         img.save(f, format=format)

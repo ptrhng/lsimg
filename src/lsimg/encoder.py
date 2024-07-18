@@ -13,7 +13,11 @@ class Encoder(ABC):
 
 class ITerm2Encoder(Encoder):
     def encode(self, d: bytes) -> Iterable[str]:
-        """Encode image data in iTerm2 image format"""
+        """Encode image data in iTerm2 image format.
+
+        For more details about iTerm2 image protocol, see
+        https://iterm2.com/documentation-images.html
+        """
         opts = {
             "preserveAspectRatio": 1,
             "inline": 1,
@@ -27,7 +31,11 @@ class ITerm2Encoder(Encoder):
 
 class KittyEncoder(Encoder):
     def encode(self, d: bytes) -> Iterable[str]:
-        """Encode image data in kitty image format"""
+        """Encode image data in Kitty image format.
+
+        For more details about Kitty image protocol, see
+        https://sw.kovidgoyal.net/kitty/graphics-protocol/
+        """
         limit = 4096
         data = base64.standard_b64encode(d)
 
@@ -49,7 +57,7 @@ class KittyEncoder(Encoder):
 
 
 def get_graphics_encoder(env: Dict[str, str]) -> Encoder | None:
-    """Return image encoder suitable for user's terminal"""
+    """Return image encoder suitable for user's terminal."""
     term = env.get("TERM", "").lower()
     if "kitty" in term:
         return KittyEncoder()
