@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lsimg"
-version = "0.1.1"
+version = "0.2.0"
 description = "lsimg is \"ls\" command for images, displaying images in a directory."
 authors = ["ptrhng <peter@ptrhng.com>"]
 readme = "README.md"
