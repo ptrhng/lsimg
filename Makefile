@@ -32,3 +32,9 @@ lint:
 test:
 	poetry run pytest -v
 	@echo
+
+## release: Bump version and update changelog
+.PHONY: release
+release:
+	@./scripts/release.sh
+	@echo
