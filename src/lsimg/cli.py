@@ -11,7 +11,7 @@ from lsimg.app import Config
 
 @click.command()
 @click.argument("args", metavar="FILE", nargs=-1)
-@click.version_option(version.__version__)
+@click.version_option(version.__version__, "-v", "--version")
 def main(args: Tuple[str]):
     """\"ls\" command for iamges"""
     if not args:
