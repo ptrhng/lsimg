@@ -8,16 +8,15 @@ lsimg is "ls" command for images, displaying images in a directory.
 
 ### Installation
 
-```bash
-# To install the latest version
-$ LSIMG_VERSION=$(git ls-remote \
---tags \
---sort '-v:refname' \
-https://github.com/ptrhng/lsimg.git \
-| head -n1 \
-| cut -d '/' -f 3)
-$ pip install https://github.com/ptrhng/lsimg/archive/refs/tags/$LSIMG_VERSION.tar.gz
+To install the latest version:
 
-# To install the latest unreleased code
+```bash
+$ curl -f https://raw.githubusercontent.com/ptrhng/lsimg/main/scripts/install.sh | bash
+```
+
+
+To install the latest unreleased code:
+
+```
 $ pip install https://github.com/ptrhng/lsimg/archive/refs/heads/main.zip
 ```
