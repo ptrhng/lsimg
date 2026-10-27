@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-10-27
+
+### 🚀 Features
+
+- Add version shorthand
+
+### 📚 Documentation
+
+- *(README)* Add installation section
+- *(README)* Update installation
+
+### ⚙️ Miscellaneous Tasks
+
+- Rename encoder_test.py to test_encoder.py
+- Bump pillow to v13
+
 ## [0.2.0] - 2024-07-19
 
 ### 🚀 Features
