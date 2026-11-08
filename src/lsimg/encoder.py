@@ -62,6 +62,10 @@ def get_graphics_encoder(env: Dict[str, str]) -> Encoder | None:
     if "kitty" in term:
         return KittyEncoder()
 
+    ghostty_resource_dir = env.get("GHOSTTY_RESOURCES_DIR", "").lower()
+    if ghostty_resource_dir:
+        return KittyEncoder()
+
     term_program = env.get("TERM_PROGRAM", "").lower()
     if "iterm" in term_program:
         return ITerm2Encoder()

@@ -37,6 +37,16 @@ def test_get_graphics_encoder_kitty():
     assert isinstance(enc, encoder.KittyEncoder)
 
 
+def test_get_graphics_encoder_ghostty():
+    enc = encoder.get_graphics_encoder(
+        {
+            "GHOSTTY_RESOURCES_DIR": "/Applications/Ghostty.app/Contents/Resources/ghostty",
+            "TERM": "xterm-ghostty",
+        }
+    )
+    assert isinstance(enc, encoder.KittyEncoder)
+
+
 def test_get_graphics_encoder_unsupported():
     enc = encoder.get_graphics_encoder(
         {
